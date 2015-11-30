@@ -117,13 +117,14 @@ func handleChannel(newChannel ssh.NewChannel) {
 	}
 
 	// Fire up bash for this session
-	// bash := exec.Command("bash", "--rcfile <(echo 'PS1=\"change > \"' << echo 'PATH=$PATH:./bin')")
-	bash := exec.Command("bash", "--rcfile", "rc")
+	// cmd := exec.Command("bash", "--rcfile", "<(echo 'PS1=\"change > \"' << echo 'PATH=$PATH:./bin')")
+	cmd := exec.Command("bash", "--rcfile", "rc")
+	// cmd := exec.Command("bash", "--rcfile")
 
 	// Prepare teardown function
 	close := func() {
 		connection.Close()
-		_, err := bash.Process.Wait()
+		_, err := cmd.Process.Wait()
 		if err != nil {
 			log.Printf("Failed to exit bash (%s)", err)
 		}
@@ -132,7 +133,7 @@ func handleChannel(newChannel ssh.NewChannel) {
 
 	// Allocate a terminal for this channel
 	log.Print("Creating pty...")
-	bashf, err := pty.Start(bash)
+	bashf, err := pty.Start(cmd)
 	if err != nil {
 		log.Printf("Could not start pty (%s)", err)
 		close()
